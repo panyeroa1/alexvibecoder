@@ -138,10 +138,14 @@ export default function App() {
         </div>
         <div className="header-right">
           <button className="header-button">What's This?</button>
-          <a href="https://github.com/vercel/v0" target="_blank" rel="noopener noreferrer" className="header-link">
-            <span className="icon">code</span> GitHub
+          <a 
+            href="https://portfolio.ai-emilio.site/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="header-link"
+          >
+            <span className="icon">link</span> Portfolio
           </a>
-          <button className="header-button deploy-button">Deploy</button>
           <button onClick={toggleTheme} className="header-button theme-toggle-button" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
               <span className="icon">{theme === 'light' ? 'dark_mode' : 'light_mode'}</span>
           </button>
