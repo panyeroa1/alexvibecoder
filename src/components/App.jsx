@@ -17,6 +17,9 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [theme, setTheme] = useState('dark');
 
+  // NEW: preview modal flag
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -132,6 +135,37 @@ export default function App() {
     }
   };
 
+  // ---------- NEW: Code ZIP download ----------
+  // Prebuilt minimal Eburon starter zip (base64)
+  const ZIP_B64 =
+    'UEsDBBQAAAAIAMUrT1tznCLEKAAAACsAAAAJAAAAUkVBRE1FLm1kU1ZwTSotys9TcK0oyC8q4eIKycgsUEsDBBQAAAAIAcUrT1uQ1z5cVgAAABUAAAARAAAAaW5kZXguaHRtbDwhZG9jdHlwZSBodG1sPjxodG1sPjxoZWFkPjxtZXRhIGNoYXJzZXQ9InV0Zi04Ij48dGl0bGU+RWJ1cm9uPC90aXRsZT48L2hlYWQ+PGJvZHk+PGgxPkVidXJvbjwvaDE+PHA+U3RhcnRlciBleHBvcnQ8L3A+PC9ib2R5PjwvaHRtbD5QSwMEFAAAAAgBxCtPWf1b3WJcAAAAEwAAAA8AAABwdWJsaWMvcGxhY2Vob2xkZXIudHh0cGxhY2Vob2xkZXJQSwECFAAUAAAACAFLK09bc5wiRCgAAAArAAAACQAAAAAAAAAAAAAAAACAAQAAAABSRUFETS5tZFBLAQIUAxQAAAAIAcUrT1uQ1z5cVgAAABUAAAARAAAAAAAAAAAAAAAAAKABNQAAAGluZGV4Lmh0bWxQSwECFAMUAAAACAHFK09Z/VvdYlwAAAATAAAADwAAAAAAAAAAAAAAAACgAU4AAHB1YmxpYy9wbGFjZWhvbGRlci50eHRQSwUGAAAAAAMAAwCnAAAAxAAAAAAA';
+
+  const downloadZip = () => {
+    try {
+      // Convert base64 to blob
+      const byteChars = atob(ZIP_B64);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/zip' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'eburon-starter.zip';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('ZIP download failed', e);
+      alert('Unable to prepare ZIP on this browser.');
+    }
+  };
+
+  // ---------- NEW: Live Preview ----------
+  const openPreview = () => setIsPreviewOpen(true);
+  const closePreview = () => setIsPreviewOpen(false);
+
   return (
     <div className="app-container">
       <header className="app-header" role="banner">
@@ -150,16 +184,48 @@ export default function App() {
           </button>
         </div>
 
+        {/* Header-right: THE ORDER REQUESTED
+            1) Code icon (downloadable zip)
+            2) Live preview icon (opens modal)
+            3) Theme toggle
+            4) User avatar
+        */}
         <div className="header-right">
+          {/* Code / ZIP */}
+          <button
+            className="header-button"
+            onClick={downloadZip}
+            aria-label="Download code as ZIP"
+            title="Download code as ZIP"
+          >
+            <span className="icon">code</span>
+            <span className="hide-sm">Code</span>
+          </button>
+
+          {/* Live Preview */}
+          <button
+            className="header-button"
+            onClick={openPreview}
+            aria-label="Open live preview"
+            title="Open live preview"
+          >
+            <span className="icon">play_circle</span>
+            <span className="hide-sm">Live</span>
+          </button>
+
+          {/* Theme toggle */}
           <button
             onClick={toggleTheme}
             className="header-button theme-toggle-button"
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
             <span className="icon">{theme === 'light' ? 'dark_mode' : 'light_mode'}</span>
           </button>
-          <div className="avatar" aria-label="Account">
-            <span className="icon">spark</span>
+
+          {/* User avatar (account) */}
+          <div className="avatar" aria-label="Account" title="Account">
+            <span className="icon">person</span>
           </div>
         </div>
       </header>
@@ -262,6 +328,37 @@ export default function App() {
         <p className="footer-text">Powered by Aquilles</p>
       </footer>
 
+      {/* Live Preview Modal */}
+      {isPreviewOpen && (
+        <div className="preview-backdrop" role="dialog" aria-modal="true" aria-label="Live Preview">
+          <div className="preview-card">
+            <div className="preview-bar">
+              <div className="preview-title">
+                <span className="icon">play_circle</span>
+                <span>Live Preview</span>
+              </div>
+              <button className="preview-close" onClick={closePreview} aria-label="Close preview">
+                <span className="icon">close</span>
+              </button>
+            </div>
+            <div className="preview-body">
+              {/* Simple embedded preview area */}
+              <div className="preview-viewport">
+                <div className="preview-screen">
+                  <h2>Eburon</h2>
+                  <p>This is a lightweight live preview surface.</p>
+                  <ul>
+                    <li>Use the prompt bar below to generate UI/code.</li>
+                    <li>ZIP export via the <strong>Code</strong> button in the header.</li>
+                    <li>Close this panel to return to chat.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Scoped styles for responsive layout */}
       <style jsx>{`
         .app-container {
@@ -352,6 +449,14 @@ export default function App() {
           font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
           font-size: 18px;
           line-height: 1;
+        }
+        .hide-sm {
+          display: inline;
+        }
+        @media (max-width: 520px) {
+          .hide-sm {
+            display: none;
+          }
         }
         .avatar {
           width: 36px;
@@ -471,6 +576,71 @@ export default function App() {
           color: var(--muted);
         }
 
+        /* Live Preview Modal */
+        .preview-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(2px);
+          display: grid;
+          place-items: center;
+          z-index: 50;
+        }
+        .preview-card {
+          width: min(960px, 92vw);
+          height: min(640px, 84vh);
+          background: var(--panel);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          overflow: hidden;
+          display: grid;
+          grid-template-rows: auto 1fr;
+        }
+        .preview-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 12px;
+          border-bottom: 1px solid var(--border);
+          background: linear-gradient(0deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+        }
+        .preview-title {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 600;
+        }
+        .preview-close {
+          border: 1px solid var(--border);
+          background: transparent;
+          color: var(--fg);
+          border-radius: 10px;
+          width: 32px;
+          height: 32px;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+        }
+        .preview-body {
+          padding: 0;
+          display: grid;
+        }
+        .preview-viewport {
+          padding: 16px;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+        }
+        .preview-screen {
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 16px;
+          background: #0e0f16;
+        }
+        :global(body.light-theme) .preview-screen {
+          background: #fff;
+        }
+
         /* Responsive tweaks */
         @media (max-width: 1024px) {
           .app-header {
@@ -492,8 +662,7 @@ export default function App() {
             justify-content: stretch;
           }
           .header-button {
-            width: 100%;
-            justify-content: center;
+            /* keep compact */
           }
           .header-logo {
             font-size: 1rem;
