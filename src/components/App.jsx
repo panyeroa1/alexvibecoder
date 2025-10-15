@@ -135,14 +135,11 @@ export default function App() {
     }
   };
 
-  // ---------- NEW: Code ZIP download ----------
-  // Prebuilt minimal Eburon starter zip (base64)
+  // ---------- Code ZIP download (unchanged) ----------
   const ZIP_B64 =
     'UEsDBBQAAAAIAMUrT1tznCLEKAAAACsAAAAJAAAAUkVBRE1FLm1kU1ZwTSotys9TcK0oyC8q4eIKycgsUEsDBBQAAAAIAcUrT1uQ1z5cVgAAABUAAAARAAAAaW5kZXguaHRtbDwhZG9jdHlwZSBodG1sPjxodG1sPjxoZWFkPjxtZXRhIGNoYXJzZXQ9InV0Zi04Ij48dGl0bGU+RWJ1cm9uPC90aXRsZT48L2hlYWQ+PGJvZHk+PGgxPkVidXJvbjwvaDE+PHA+U3RhcnRlciBleHBvcnQ8L3A+PC9ib2R5PjwvaHRtbD5QSwMEFAAAAAgBxCtPWf1b3WJcAAAAEwAAAA8AAABwdWJsaWMvcGxhY2Vob2xkZXIudHh0cGxhY2Vob2xkZXJQSwECFAAUAAAACAFLK09bc5wiRCgAAAArAAAACQAAAAAAAAAAAAAAAACAAQAAAABSRUFETS5tZFBLAQIUAxQAAAAIAcUrT1uQ1z5cVgAAABUAAAARAAAAAAAAAAAAAAAAAKABNQAAAGluZGV4Lmh0bWxQSwECFAMUAAAACAHFK09Z/VvdYlwAAAATAAAADwAAAAAAAAAAAAAAAACgAU4AAHB1YmxpYy9wbGFjZWhvbGRlci50eHRQSwUGAAAAAAMAAwCnAAAAxAAAAAAA';
-
   const downloadZip = () => {
     try {
-      // Convert base64 to blob
       const byteChars = atob(ZIP_B64);
       const byteNumbers = new Array(byteChars.length);
       for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
@@ -162,7 +159,7 @@ export default function App() {
     }
   };
 
-  // ---------- NEW: Live Preview ----------
+  // ---------- Live Preview ----------
   const openPreview = () => setIsPreviewOpen(true);
   const closePreview = () => setIsPreviewOpen(false);
 
@@ -178,18 +175,7 @@ export default function App() {
           <div className="header-logo" aria-label="App title">Eburon</div>
         </div>
 
-        <div className="header-center">
-          <button className="header-button">
-            Select chat <span className="icon">expand_more</span>
-          </button>
-        </div>
-
-        {/* Header-right: THE ORDER REQUESTED
-            1) Code icon (downloadable zip)
-            2) Live preview icon (opens modal)
-            3) Theme toggle
-            4) User avatar
-        */}
+        {/* REMOVED "Select chat" block */}
         <div className="header-right">
           {/* Code / ZIP */}
           <button
@@ -223,7 +209,7 @@ export default function App() {
             <span className="icon">{theme === 'light' ? 'dark_mode' : 'light_mode'}</span>
           </button>
 
-          {/* User avatar (account) */}
+          {/* User avatar */}
           <div className="avatar" aria-label="Account" title="Account">
             <span className="icon">person</span>
           </div>
@@ -256,76 +242,79 @@ export default function App() {
         )}
       </main>
 
+      {/* FOOTER WITH WIDER MESSAGE INPUT CONTAINER */}
       <footer className="prompt-footer" role="contentinfo">
-        {image && (
-          <div className="image-preview-wrapper">
-            <img src={image.data} alt="Preview" className="image-preview" />
-            <span className="image-preview-text">{image.name}</span>
-            <button
-              className="remove-image-btn"
-              onClick={() => setImage(null)}
-              aria-label="Remove image"
-            >
-              <span className="icon">close</span>
-            </button>
+        <div className="prompt-container">
+          {image && (
+            <div className="image-preview-wrapper">
+              <img src={image.data} alt="Preview" className="image-preview" />
+              <span className="image-preview-text">{image.name}</span>
+              <button
+                className="remove-image-btn"
+                onClick={() => setImage(null)}
+                aria-label="Remove image"
+              >
+                <span className="icon">close</span>
+              </button>
+            </div>
+          )}
+
+          <div className="prompt-input-wrapper">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              style={{ display: 'none' }}
+            />
+
+            <div className="prompt-input-icons left">
+              <button
+                className="prompt-icon-button"
+                onClick={handleAddFileClick}
+                aria-label="Add file"
+              >
+                <span className="icon">add</span>
+              </button>
+            </div>
+
+            <textarea
+              rows="1"
+              className="prompt-input"
+              placeholder="Describe what you want to build..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isGenerating}
+              style={{ height: 'auto', maxHeight: '220px' }}
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+            />
+
+            <div className="prompt-input-icons right">
+              <button
+                className={`prompt-icon-button ${isRecording ? 'is-recording' : ''}`}
+                onClick={handleMicClick}
+                aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+              >
+                <span className="icon">mic</span>
+              </button>
+
+              <button
+                className="prompt-icon-button prompt-submit-button"
+                onClick={handlePromptSubmit}
+                disabled={(!prompt.trim() && !image) || isGenerating}
+                aria-label="Submit prompt"
+              >
+                <span className="icon">arrow_upward</span>
+              </button>
+            </div>
           </div>
-        )}
 
-        <div className="prompt-input-wrapper">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            style={{ display: 'none' }}
-          />
-
-          <div className="prompt-input-icons left">
-            <button
-              className="prompt-icon-button"
-              onClick={handleAddFileClick}
-              aria-label="Add file"
-            >
-              <span className="icon">add</span>
-            </button>
-          </div>
-
-          <textarea
-            rows="1"
-            className="prompt-input"
-            placeholder="Describe what you want to build..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isGenerating}
-            style={{ height: 'auto', maxHeight: '200px' }}
-            onInput={(e) => {
-              e.target.style.height = 'auto';
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
-          />
-
-          <div className="prompt-input-icons right">
-            <button
-              className={`prompt-icon-button ${isRecording ? 'is-recording' : ''}`}
-              onClick={handleMicClick}
-              aria-label={isRecording ? 'Stop recording' : 'Start recording'}
-            >
-              <span className="icon">mic</span>
-            </button>
-
-            <button
-              className="prompt-icon-button prompt-submit-button"
-              onClick={handlePromptSubmit}
-              disabled={(!prompt.trim() && !image) || isGenerating}
-              aria-label="Submit prompt"
-            >
-              <span className="icon">arrow_upward</span>
-            </button>
-          </div>
+          <p className="footer-text">Powered by Aquilles</p>
         </div>
-
-        <p className="footer-text">Powered by Aquilles</p>
       </footer>
 
       {/* Live Preview Modal */}
@@ -342,7 +331,6 @@ export default function App() {
               </button>
             </div>
             <div className="preview-body">
-              {/* Simple embedded preview area */}
               <div className="preview-viewport">
                 <div className="preview-screen">
                   <h2>Eburon</h2>
@@ -385,12 +373,12 @@ export default function App() {
           --accent: #cbd5e1;
         }
 
-        /* Header */
+        /* Header (2 columns now since Select removed) */
         .app-header {
           position: sticky;
           top: 0;
           display: grid;
-          grid-template-columns: 1fr auto 1fr;
+          grid-template-columns: 1fr auto;
           align-items: center;
           gap: 0.5rem;
           padding: 0.75rem 1rem;
@@ -403,10 +391,6 @@ export default function App() {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-        }
-        .header-center {
-          display: flex;
-          justify-content: center;
         }
         .header-logo {
           font-weight: 700;
@@ -450,14 +434,9 @@ export default function App() {
           font-size: 18px;
           line-height: 1;
         }
-        .hide-sm {
-          display: inline;
-        }
-        @media (max-width: 520px) {
-          .hide-sm {
-            display: none;
-          }
-        }
+        .hide-sm { display: inline; }
+        @media (max-width: 520px) { .hide-sm { display: none; } }
+
         .avatar {
           width: 36px;
           height: 36px;
@@ -475,12 +454,9 @@ export default function App() {
           margin: 0 auto;
           width: 100%;
         }
-        .chat-feed {
-          display: grid;
-          gap: 0.75rem;
-        }
+        .chat-feed { display: grid; gap: 0.75rem; }
 
-        /* Footer / Prompt bar */
+        /* Footer / Prompt area */
         .prompt-footer {
           border-top: 1px solid var(--border);
           background: var(--panel);
@@ -488,6 +464,21 @@ export default function App() {
           position: sticky;
           bottom: 0;
         }
+
+        /* NEW: Container around the message input (wider) */
+        .prompt-container {
+          width: 100%;
+          max-width: 1100px; /* WIDER than before */
+          margin: 0 auto;
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          background:
+            linear-gradient(0deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03)),
+            var(--panel);
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.02) inset;
+        }
+
         .image-preview-wrapper {
           display: inline-flex;
           align-items: center;
@@ -511,58 +502,58 @@ export default function App() {
           color: var(--muted);
           cursor: pointer;
         }
+
         .prompt-input-wrapper {
           position: relative;
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: end;
-          gap: 8px;
-          max-width: 900px;
+          gap: 10px;            /* slightly larger gap */
+          max-width: 100%;      /* FULL width inside container */
           margin: 0 auto;
         }
         .prompt-input {
           width: 100%;
           resize: none;
-          padding: 12px 44px;
-          border-radius: 14px;
+          padding: 14px 48px;   /* slightly more padding */
+          border-radius: 16px;  /* container vibe */
           border: 1px solid var(--border);
           background: var(--panel);
           color: var(--fg);
           outline: none;
+          font-size: 0.98rem;
         }
-        .prompt-input:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
+        .prompt-input:disabled { opacity: 0.7; cursor: not-allowed; }
+
         .prompt-input-icons {
           display: flex;
-          gap: 6px;
+          gap: 8px;
           align-items: center;
         }
         .prompt-input-icons.left {
           position: absolute;
-          left: 8px;
-          bottom: 10px;
+          left: 10px;
+          bottom: 12px;
         }
         .prompt-input-icons.right {
           position: absolute;
-          right: 8px;
-          bottom: 10px;
+          right: 10px;
+          bottom: 12px;
         }
         .prompt-icon-button {
-          width: 32px;
-          height: 32px;
+          width: 34px;
+          height: 34px;
           display: grid;
           place-items: center;
-          border-radius: 10px;
+          border-radius: 12px;
           border: 1px solid var(--border);
           background: transparent;
           color: var(--fg);
           cursor: pointer;
         }
         .prompt-submit-button {
-          width: 36px;
-          height: 36px;
+          width: 38px;
+          height: 38px;
           border-radius: 12px;
         }
         .prompt-icon-button.is-recording {
@@ -571,7 +562,7 @@ export default function App() {
         }
         .footer-text {
           text-align: center;
-          margin-top: 8px;
+          margin-top: 10px;
           font-size: 12px;
           color: var(--muted);
         }
@@ -621,34 +612,19 @@ export default function App() {
           place-items: center;
           cursor: pointer;
         }
-        .preview-body {
-          padding: 0;
-          display: grid;
-        }
-        .preview-viewport {
-          padding: 16px;
-          width: 100%;
-          height: 100%;
-          overflow: auto;
-        }
+        .preview-body { padding: 0; display: grid; }
+        .preview-viewport { padding: 16px; width: 100%; height: 100%; overflow: auto; }
         .preview-screen {
           border: 1px solid var(--border);
           border-radius: 12px;
           padding: 16px;
           background: #0e0f16;
         }
-        :global(body.light-theme) .preview-screen {
-          background: #fff;
-        }
+        :global(body.light-theme) .preview-screen { background: #fff; }
 
-        /* Responsive tweaks */
+        /* Responsive */
         @media (max-width: 1024px) {
-          .app-header {
-            grid-template-columns: 1fr auto auto;
-          }
-          .header-center {
-            justify-content: flex-start;
-          }
+          .app-header { grid-template-columns: 1fr auto; }
         }
         @media (max-width: 768px) {
           .app-header {
@@ -656,38 +632,15 @@ export default function App() {
             grid-auto-flow: row;
             gap: 0.5rem 0.75rem;
           }
-          .header-center {
-            grid-column: 1 / -1;
-            order: 3;
-            justify-content: stretch;
-          }
-          .header-button {
-            /* keep compact */
-          }
-          .header-logo {
-            font-size: 1rem;
-          }
-          .app-main {
-            padding: 0.5rem;
-          }
-          .prompt-input-wrapper {
-            margin: 0 0.25rem;
-          }
+          .header-logo { font-size: 1rem; }
+          .app-main { padding: 0.5rem; }
+          .prompt-container { max-width: 100%; padding: 10px; }
         }
         @media (max-width: 420px) {
-          .hamburger {
-            width: 36px;
-            height: 32px;
-          }
-          .prompt-input {
-            padding: 12px 40px;
-          }
-          .prompt-input-icons.left {
-            left: 6px;
-          }
-          .prompt-input-icons.right {
-            right: 6px;
-          }
+          .hamburger { width: 36px; height: 32px; }
+          .prompt-input { padding: 12px 42px; }
+          .prompt-input-icons.left { left: 6px; bottom: 10px; }
+          .prompt-input-icons.right { right: 6px; bottom: 10px; }
         }
       `}</style>
     </div>
